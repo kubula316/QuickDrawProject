@@ -1,6 +1,33 @@
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+import pygame, os, random
+
+pygame.init()
+
+SIZESCREEN = WIDTH, HEIGHT = 1366, 740
+screen = pygame.display.set_mode(SIZESCREEN)
+clock = pygame.time.Clock()
+# wczytywanie grafik
+path = os.path.join(os.getcwd(), 'images')
+file_names = os.listdir(path)
+LIGHTGREEN = pygame.color.THECOLORS['lightgreen']
+BACKGROUND = pygame.image.load(os.path.join(path, 'Background.png')).convert()
+file_names.remove('Background.png')
+IMAGES = {}
+for file_name in file_names:
+    image_name = file_name[:-4].upper()
+    IMAGES[image_name] = pygame.image.load(os.path.join(path, file_name)).convert_alpha(BACKGROUND)
+
+# klasa reprezentująca gracza
+class Player(pygame.sprite.Sprite):
+    def __init__(self, image, cx, cy):
+        super().__init__()
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.center = cx, cy
+        self.level = None
+        self.lives = 3
+
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
 
 #konkretyzacja obiektów
 player = Player(IMAGES['PLAYER'], 500, 500)
@@ -10,8 +37,7 @@ player = Player(IMAGES['PLAYER'], 500, 500)
 window_open = True
 while window_open:
     # pętla zdarzeń
-    #screen.fill(LIGHTGREEN)
-    screen.blit(BACKGROUND, [-300, -300])
+    screen.blit(BACKGROUND, [0, 0])
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
@@ -29,8 +55,6 @@ while window_open:
 
 
 pygame.quit()
-
-#Komentarz
 
 
 
