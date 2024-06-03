@@ -30,6 +30,8 @@ while window_open:
 
 pygame.quit()
 
+#Komentarz
+
 
 
 
