@@ -12,7 +12,7 @@ LIGHTGREEN = pygame.color.THECOLORS['lightgreen']
 BACKGROUND = pygame.image.load(os.path.join(path, 'Background.png')).convert()
 ATTACKTIME = pygame.USEREVENT +1
 
-start_time2 = None
+
 file_names.remove('Background.png')
 IMAGES = {}
 for file_name in file_names:
@@ -44,7 +44,8 @@ class Exclamation():
         self.AllowAttack = False
         self.IsDraw = False
         self.start_time = None
-
+        self.start_time2 = None
+        self.random_interval = random.randint(1000, 3000)  # Random interval between 1 and 3 seconds
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
@@ -64,6 +65,20 @@ class Exclamation():
                 player.CanAttack = False
                 player2.CanAttack = False
 
+    def StartTimer(self):
+        current_time2 = pygame.time.get_ticks()
+        if self.start_time2 is None:
+            self.start_time2 = current_time2
+            self.random_interval = random.randint(3000, 6000)  # Generate new random interval
+            print(self.random_interval/1000)
+        if current_time2 - self.start_time2 >= self.random_interval:
+            # Perform the action
+            self.AllowAttack = True
+            # Reset the timer
+            self.start_time2 = current_time2
+            self.random_interval = random.randint(3000, 6000)  # Generate new random interval for next action
+            print(self.random_interval/1000)
+
 
 
 
@@ -78,6 +93,7 @@ exclamation = Exclamation(IMAGES['EXCLAMATION'], 800, 400)
 window_open = True
 
 while window_open:
+
     # pętla zdarzeń
     screen.blit(BACKGROUND, [0, 0])
     for event in pygame.event.get():
@@ -93,6 +109,7 @@ while window_open:
 
 
     # rysowanie i aktualizacja obiektów
+    exclamation.StartTimer()
     player.draw(screen)
     player2.draw(screen)
     exclamation.CheckAttack()
