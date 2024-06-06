@@ -11,7 +11,7 @@ file_names = os.listdir(path)
 LIGHTGREEN = pygame.color.THECOLORS['lightgreen']
 BACKGROUND = pygame.image.load(os.path.join(path, 'Background.png')).convert()
 ATTACKTIME = pygame.USEREVENT +1
-start_time = None
+
 start_time2 = None
 file_names.remove('Background.png')
 IMAGES = {}
@@ -29,7 +29,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = cx, cy
         self.lives = 3
         self.score = 0
-        self.IsAttacked = False
+        self.CanAttack = False
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
@@ -43,9 +43,26 @@ class Exclamation():
         self.rect.center = cx, cy
         self.AllowAttack = False
         self.IsDraw = False
+        self.start_time = None
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
+
+    def CheckAttack(self):
+        if exclamation.AllowAttack:
+            if self.start_time is None:
+                self.start_time = pygame.time.get_ticks()
+            # Check the time elapsed
+            current_time = pygame.time.get_ticks()
+            if current_time - self.start_time <= 500:  # 2000 milliseconds = 2 seconds
+                exclamation.draw(screen)
+                player.CanAttack = True
+                player2.CanAttack = True
+            else:
+                exclamation.AllowAttack = False
+                self.start_time = None
+                player.CanAttack = False
+                player2.CanAttack = False
 
 
 
@@ -59,7 +76,6 @@ exclamation = Exclamation(IMAGES['EXCLAMATION'], 800, 400)
 
 # pętla gry
 window_open = True
-start_time2 = pygame.time.get_ticks()
 
 while window_open:
     # pętla zdarzeń
@@ -79,18 +95,9 @@ while window_open:
     # rysowanie i aktualizacja obiektów
     player.draw(screen)
     player2.draw(screen)
+    exclamation.CheckAttack()
 
-    if exclamation.AllowAttack:
-        if start_time is None:
-            start_time = pygame.time.get_ticks()
-        # Check the time elapsed
-        current_time = pygame.time.get_ticks()
-        if current_time - start_time <= 2000:  # 2000 milliseconds = 2 seconds
-            exclamation.draw(screen)
-            #Dodac zminna na attak
-        else:
-            exclamation.AllowAttack = False
-            start_time = None
+
 
 
 
