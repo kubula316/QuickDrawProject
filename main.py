@@ -30,9 +30,25 @@ class Player(pygame.sprite.Sprite):
         self.lives = 3
         self.score = 0
         self.CanAttack = False
+        self.FailedAttack = False
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
+
+    def Attack(self):
+        if exclamation.AllowAttack:
+            print("Atak UDANY")
+            # Animacja ataku
+            if self.image == IMAGES['PLAYER2']:
+                print("P2 ATTACKED")
+                self.image = IMAGES['PLAYER2ATTACK']
+            elif self.image == IMAGES['PLAYER']:
+                print("P1 ATTACKED")
+                self.image = IMAGES['PLAYER1ATTACK']
+
+        else:
+            print("Atak Zjeaby")
+
 
 
 class Exclamation():
@@ -83,6 +99,9 @@ class Exclamation():
 
 
 
+
+
+
 # konkretyzacja obiektów
 player = Player(IMAGES['PLAYER'], 550, 500)
 player2 = Player(IMAGES['PLAYER2'], 1050, 300)
@@ -100,9 +119,16 @@ while window_open:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 window_open = False
-            if event.key == pygame.K_SPACE:
-                exclamation.AllowAttack = True
-                print("DUPA")
+            if event.key == pygame.K_RIGHT and event.key == pygame.K_LEFT:
+                print("Remis")
+            if event.key == pygame.K_RIGHT:
+                player2.Attack()
+
+
+            if event.key == pygame.K_LEFT:
+                player.Attack()
+
+
         if event.type == pygame.QUIT:
             window_open = False
 
