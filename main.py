@@ -57,7 +57,7 @@ class Player(pygame.sprite.Sprite):
                 player.IsAttacking = True
 
         else:
-            print("Atak Zjeaby")
+            print("Atak Zjeabyy")
 
 
 
