@@ -44,6 +44,9 @@ class Player(pygame.sprite.Sprite):
                 self.image = IMAGES['PLAYER2ATTACK']
                 if player.lives > 1:
                     player.lives -= 1
+                    exclamation.AllowAttack = False
+                    player2.IsAttacking = True
+                    player.image = IMAGES['PLAYER1DAMAGE']
                     #aniamcja ataku z cofnieciem
                 if player.lives == 1:
                     print("koniec gry WYGRYWA P2")
@@ -155,8 +158,17 @@ while window_open:
                 player.rect.center = 550, 500
                 player.IsAttacking = False
 
-
-
+    if event.type == P2ATTACK:
+        if player2.IsAttacking:
+            if player2.rect.x > 600:
+                player2.rect.x -= 60
+            if player2.rect.y < 400:
+                player2.rect.y += 20
+            if player2.rect.x < 600 and player.rect.y > 200:
+                player2.image = IMAGES['PLAYER2']
+                player.image = IMAGES["PLAYER"]
+                player2.rect.center = 1050, 300
+                player2.IsAttacking = False
 
 
 
