@@ -10,10 +10,8 @@ path = os.path.join(os.getcwd(), 'images')
 file_names = os.listdir(path)
 LIGHTGREEN = pygame.color.THECOLORS['lightgreen']
 BACKGROUND = pygame.image.load(os.path.join(path, 'Background.png')).convert()
-P1ATTACK = pygame.USEREVENT + 1
-P2ATTACK = pygame.USEREVENT + 2
-pygame.time.set_timer(P1ATTACK, 1)
-pygame.time.set_timer(P2ATTACK, 1)
+Failed_Attack_P1 = pygame.USEREVENT + 1
+Failed_Attack_P2 = pygame.USEREVENT + 2
 
 file_names.remove('Background.png')
 IMAGES = {}
@@ -39,30 +37,29 @@ class Player(pygame.sprite.Sprite):
         surface.blit(self.image, self.rect)
 
     def Attack(self):
-        if exclamation.AllowAttack:
+
+        if exclamation.AllowAttack and self.FailedAttack == False:
             if self.image == IMAGES['PLAYER2']:
                 self.image = IMAGES['PLAYER2ATTACK']
-                if player.lives > 1:
-                    player.lives -= 1
-                    exclamation.AllowAttack = False
-                    player2.IsAttacking = True
-                    player.image = IMAGES['PLAYER1DAMAGE']
-                    #aniamcja ataku z cofnieciem
-                if player.lives == 1:
-                    print("koniec gry WYGRYWA P2")
-                    # aniamcja ataku bez cofnieciem
-                    #zakonczenie gry
+                player.lives -= 1
+                exclamation.AllowAttack = False
+                player2.IsAttacking = True
+                player.image = IMAGES['PLAYER1DAMAGE']
             elif self.image == IMAGES['PLAYER']:
                 self.image = IMAGES['PLAYER1ATTACK']
                 player2.lives -= 1
                 exclamation.AllowAttack = False
                 player2.image = IMAGES['PLAYER2DAMAGE']
                 player.IsAttacking = True
-
         else:
             print("Atak Zjeabyy")
-
-
+            self.FailedAttack = True
+            if self.image == IMAGES['PLAYER']:
+                cross.drawing = True
+                pygame.time.set_timer(Failed_Attack_P1, 3000, 1)
+            if self.image == IMAGES['PLAYER2']:
+                cross2.drawing = True
+                pygame.time.set_timer(Failed_Attack_P2, 3000, 1)
 
 
 class Exclamation():
@@ -109,12 +106,23 @@ class Exclamation():
             self.random_interval = random.randint(2000, 4000)  # Generate new random interval for next action
             print(self.random_interval/1000)
 
+class Cross():
+    def __init__(self, image, cx, cy):
+        super().__init__()
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.center = cx, cy
+        self.drawing = False
+    def draw(self, surface):
+        if self.drawing:
+            surface.blit(self.image, self.rect)
 
 # konkretyzacja obiektów
 player = Player(IMAGES['PLAYER'], 550, 500)
 player2 = Player(IMAGES['PLAYER2'], 1050, 300)
 exclamation = Exclamation(IMAGES['EXCLAMATION'], 800, 400)
-
+cross = Cross(IMAGES['CROSS'], 550, 500)
+cross2 = Cross(IMAGES['CROSS'], 1050, 300)
 
 # pętla gry
 window_open = True
@@ -132,43 +140,50 @@ while window_open:
             #ATAKI GRACZY
             if event.key == pygame.K_RIGHT:
                 player2.Attack()
-
             if event.key == pygame.K_LEFT:
                 player.Attack()
 
-
-
         if event.type == pygame.QUIT:
             window_open = False
-
+        if event.type == Failed_Attack_P1:
+            player.FailedAttack = False
+            cross.drawing = False
+        if event.type == Failed_Attack_P2:
+            player2.FailedAttack = False
+            cross2.drawing = False
 
 
     # rysowanie i aktualizacja obiektów
     exclamation.StartTimer()
-    if event.type == P1ATTACK:
-        if player.IsAttacking:
-            if player.rect.x < 600:
-                player.rect.x += 60
-            if player.rect.y > 200:
-                player.rect.y -= 20
-            if player.rect.x > 600 and player.rect.y < 200:
-                pygame.time.delay(500)
-                player.image = IMAGES['PLAYER']
-                player2.image = IMAGES["PLAYER2"]
-                player.rect.center = 550, 500
-                player.IsAttacking = False
 
-    if event.type == P2ATTACK:
-        if player2.IsAttacking:
-            if player2.rect.x > 600:
-                player2.rect.x -= 60
-            if player2.rect.y < 400:
-                player2.rect.y += 20
-            if player2.rect.x < 600 and player.rect.y > 200:
-                player2.image = IMAGES['PLAYER2']
-                player.image = IMAGES["PLAYER"]
-                player2.rect.center = 1050, 300
-                player2.IsAttacking = False
+    if player.IsAttacking:
+        if player.rect.x < 600:
+            player.rect.x += 60
+        if player.rect.y > 200:
+            player.rect.y -= 20
+        if player.rect.x > 600 and player.rect.y < 200:
+            pygame.time.delay(500)
+            player.image = IMAGES['PLAYER']
+            player2.image = IMAGES["PLAYER2"]
+            player.rect.center = 550, 500
+            player2.FailedAttack = False
+            cross2.drawing = False
+            player.IsAttacking = False
+
+
+    if player2.IsAttacking:
+        if player2.rect.x > 600:
+            player2.rect.x -= 60
+        if player2.rect.y < 400:
+            player2.rect.y += 20
+        if player2.rect.x < 600 and player.rect.y > 200:
+            pygame.time.delay(500)
+            player2.image = IMAGES['PLAYER2']
+            player.image = IMAGES["PLAYER"]
+            player2.rect.center = 1050, 300
+            player.FailedAttack = False
+            cross.drawing = False
+            player2.IsAttacking = False
 
 
 
@@ -178,12 +193,8 @@ while window_open:
     player.draw(screen)
     player2.draw(screen)
     exclamation.CheckAttack()
-
-
-
-
-
-
+    cross.draw(screen)
+    cross2.draw(screen)
 
 
     # aktualizacja okna gry
