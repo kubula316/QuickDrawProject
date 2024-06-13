@@ -10,6 +10,7 @@ path = os.path.join(os.getcwd(), 'images')
 file_names = os.listdir(path)
 LIGHTGREEN = pygame.color.THECOLORS['lightgreen']
 BACKGROUND = pygame.image.load(os.path.join(path, 'Background.png')).convert()
+MENU = pygame.image.load(os.path.join(path, 'Background.png')).convert()
 Failed_Attack_P1 = pygame.USEREVENT + 1
 Failed_Attack_P2 = pygame.USEREVENT + 2
 
@@ -129,13 +130,17 @@ class Level():
         self.PointP2 = 0
         self.IntroWasPlayed = False
         self.GameHasEnded = False
+        self.MenuActive = False
 
     def draw(self):
         screen.blit(BACKGROUND, [0, 0])
-        for i in range(self.player1.lives):
-            screen.blit(IMAGES['HEARTH2'], (20 + i * 120, 750))
-        for i in range(self.player2.lives):
-            screen.blit(IMAGES['HEARTH2'], (1460 - i * 120, 20))
+        if not self.MenuActive:
+            for i in range(self.player1.lives):
+                screen.blit(IMAGES['HEARTH2'], (20 + i * 120, 750))
+            for i in range(self.player2.lives):
+                screen.blit(IMAGES['HEARTH2'], (1460 - i * 120, 20))
+        else:
+            screen.blit(MENU, [0, 0])
 
 
 # konkretyzacja obiektów
