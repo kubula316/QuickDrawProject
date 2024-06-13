@@ -117,9 +117,26 @@ class Cross():
         if self.drawing:
             surface.blit(self.image, self.rect)
 
+class Level():
+    def __init__(self, player, player2):
+        self.player1 = player
+        self.player2 = player2
+        self.pointP1 = 0
+        self.PointP2 = 0
+
+    def draw(self):
+        screen.blit(BACKGROUND, [0, 0])
+        for i in range(self.player1.lives):
+            screen.blit(IMAGES['HEARTH2'], (20 + i * 120, 750))
+        for i in range(self.player2.lives):
+            screen.blit(IMAGES['HEARTH2'], (1460 - i * 120, 20))
+
+
+
 # konkretyzacja obiektów
 player = Player(IMAGES['PLAYER'], 550, 500)
 player2 = Player(IMAGES['PLAYER2'], 1050, 300)
+level = Level(player, player2)
 exclamation = Exclamation(IMAGES['EXCLAMATION'], 800, 400)
 cross = Cross(IMAGES['CROSS'], 550, 500)
 cross2 = Cross(IMAGES['CROSS'], 1050, 300)
@@ -130,7 +147,7 @@ window_open = True
 while window_open:
 
     # pętla zdarzeń
-    screen.blit(BACKGROUND, [0, 0])
+    level.draw()
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
