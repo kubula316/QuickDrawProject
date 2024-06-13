@@ -1,4 +1,4 @@
-import pygame, os, random, time
+import pygame, os, random
 
 pygame.init()
 
@@ -73,10 +73,11 @@ class Exclamation():
         self.start_time = None
         self.start_time2 = None
         self.random_interval = random.randint(1000, 3000)  # Random interval between 1 and 3 seconds
+
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
-    def CheckAttack(self):
+    def checkAttack(self):
         if exclamation.AllowAttack:
             if self.start_time is None:
                 self.start_time = pygame.time.get_ticks()
@@ -92,19 +93,20 @@ class Exclamation():
                 player.CanAttack = False
                 player2.CanAttack = False
 
-    def StartTimer(self):
+    def startTimer(self):
         current_time2 = pygame.time.get_ticks()
         if self.start_time2 is None:
             self.start_time2 = current_time2
             self.random_interval = random.randint(2000, 4000)  # Generate new random interval
-            print(self.random_interval/1000)
+            print(self.random_interval / 1000)
         if current_time2 - self.start_time2 >= self.random_interval:
             # Perform the action
             self.AllowAttack = True
             # Reset the timer
             self.start_time2 = current_time2
             self.random_interval = random.randint(2000, 4000)  # Generate new random interval for next action
-            print(self.random_interval/1000)
+            print(self.random_interval / 1000)
+
 
 class Cross():
     def __init__(self, image, cx, cy):
@@ -113,9 +115,11 @@ class Cross():
         self.rect = self.image.get_rect()
         self.rect.center = cx, cy
         self.drawing = False
+
     def draw(self, surface):
         if self.drawing:
             surface.blit(self.image, self.rect)
+
 
 class Level():
     def __init__(self, player, player2):
@@ -124,6 +128,7 @@ class Level():
         self.pointP1 = 0
         self.PointP2 = 0
         self.IntroWasPlayed = False
+        self.GameHasEnded = False
 
     def draw(self):
         screen.blit(BACKGROUND, [0, 0])
@@ -131,7 +136,6 @@ class Level():
             screen.blit(IMAGES['HEARTH2'], (20 + i * 120, 750))
         for i in range(self.player2.lives):
             screen.blit(IMAGES['HEARTH2'], (1460 - i * 120, 20))
-
 
 
 # konkretyzacja obiektów
@@ -150,7 +154,7 @@ while window_open:
     # pętla zdarzeń
     level.draw()
     if not level.IntroWasPlayed:
-        if player.rect.x < 550-190 and player2.rect.x > 1050-190:
+        if player.rect.x < 550 - 190 and player2.rect.x > 1050 - 190:
             player.rect.x += 10
             player2.rect.x -= 10
         else:
@@ -161,7 +165,7 @@ while window_open:
                 window_open = False
             if event.key == pygame.K_RIGHT and event.key == pygame.K_LEFT:
                 print("Remis")
-            #ATAKI GRACZY
+            # ATAKI GRACZY
             if event.key == pygame.K_RIGHT:
                 player2.Attack()
             if event.key == pygame.K_LEFT:
@@ -176,9 +180,7 @@ while window_open:
             player2.FailedAttack = False
             cross2.drawing = False
 
-
-
-    exclamation.StartTimer()
+    exclamation.startTimer()
 
     if player.IsAttacking:
         if player.rect.x < 600:
@@ -187,12 +189,16 @@ while window_open:
             player.rect.y -= 20
         if player.rect.x > 600 and player.rect.y < 200:
             pygame.time.delay(500)
-            player.image = IMAGES['PLAYER']
-            player2.image = IMAGES["PLAYER2"]
-            player.rect.center = 550, 500
-            player2.FailedAttack = False
-            cross2.drawing = False
-            player.IsAttacking = False
+            if player2.lives > 0:
+                player.image = IMAGES['PLAYER']
+                player2.image = IMAGES["PLAYER2"]
+                player.rect.center = 550, 500
+                player2.FailedAttack = False
+                cross2.drawing = False
+                player.IsAttacking = False
+            else:
+                print("P1 wygrywa!")
+                level.GameHasEnded = True
 
     if player2.IsAttacking:
         if player2.rect.x > 600:
@@ -201,20 +207,23 @@ while window_open:
             player2.rect.y += 20
         if player2.rect.x < 600 and player.rect.y > 200:
             pygame.time.delay(500)
-            player2.image = IMAGES['PLAYER2']
-            player.image = IMAGES["PLAYER"]
-            player2.rect.center = 1050, 300
-            player.FailedAttack = False
-            cross.drawing = False
-            player2.IsAttacking = False
+            if player.lives > 0:
+                player2.image = IMAGES['PLAYER2']
+                player.image = IMAGES["PLAYER"]
+                player2.rect.center = 1050, 300
+                player.FailedAttack = False
+                cross.drawing = False
+                player2.IsAttacking = False
+            else:
+                print("P2 wygrywa!")
+                level.GameHasEnded = True
 
     # rysowanie i aktualizacja obiektów
     player.draw(screen)
     player2.draw(screen)
-    exclamation.CheckAttack()
+    exclamation.checkAttack()
     cross.draw(screen)
     cross2.draw(screen)
-
 
     # aktualizacja okna gry
     pygame.display.flip()
