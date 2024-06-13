@@ -123,6 +123,7 @@ class Level():
         self.player2 = player2
         self.pointP1 = 0
         self.PointP2 = 0
+        self.IntroWasPlayed = False
 
     def draw(self):
         screen.blit(BACKGROUND, [0, 0])
@@ -134,8 +135,8 @@ class Level():
 
 
 # konkretyzacja obiektów
-player = Player(IMAGES['PLAYER'], 550, 500)
-player2 = Player(IMAGES['PLAYER2'], 1050, 300)
+player = Player(IMAGES['PLAYER'], -150, 500)
+player2 = Player(IMAGES['PLAYER2'], 1750, 300)
 level = Level(player, player2)
 exclamation = Exclamation(IMAGES['EXCLAMATION'], 800, 400)
 cross = Cross(IMAGES['CROSS'], 550, 500)
@@ -148,6 +149,12 @@ while window_open:
 
     # pętla zdarzeń
     level.draw()
+    if not level.IntroWasPlayed:
+        if player.rect.x < 550-190 and player2.rect.x > 1050-190:
+            player.rect.x += 10
+            player2.rect.x -= 10
+        else:
+            level.IntroWasPlayed = True
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
@@ -170,7 +177,7 @@ while window_open:
             cross2.drawing = False
 
 
-    # rysowanie i aktualizacja obiektów
+
     exclamation.StartTimer()
 
     if player.IsAttacking:
@@ -187,7 +194,6 @@ while window_open:
             cross2.drawing = False
             player.IsAttacking = False
 
-
     if player2.IsAttacking:
         if player2.rect.x > 600:
             player2.rect.x -= 60
@@ -202,11 +208,7 @@ while window_open:
             cross.drawing = False
             player2.IsAttacking = False
 
-
-
-
-
-
+    # rysowanie i aktualizacja obiektów
     player.draw(screen)
     player2.draw(screen)
     exclamation.CheckAttack()
@@ -216,7 +218,6 @@ while window_open:
 
     # aktualizacja okna gry
     pygame.display.flip()
-
     clock.tick(60)
 
 pygame.quit()
