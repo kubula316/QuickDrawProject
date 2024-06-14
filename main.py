@@ -11,7 +11,7 @@ file_names = os.listdir(path)
 LIGHTGREEN = pygame.color.THECOLORS['lightgreen']
 RED = pygame.color.THECOLORS['red']
 BACKGROUND = pygame.image.load(os.path.join(path, 'Background.png')).convert()
-MENU =pygame.image.load(os.path.join(path, 'MENU.png')).convert()
+MENU = pygame.image.load(os.path.join(path, 'MENU.png')).convert()
 Failed_Attack_P1 = pygame.USEREVENT + 1
 Failed_Attack_P2 = pygame.USEREVENT + 2
 
@@ -128,11 +128,11 @@ class Level():
         self.player2 = player2
         self.IntroWasPlayed = False
         self.GameHasEnded = False
-        self.MenuActive = False
+        self.MenuActive = True
 
     def draw(self):
-        screen.blit(BACKGROUND, [0, 0])
         if not self.MenuActive:
+            screen.blit(BACKGROUND, [0, 0])
             player.draw(screen)
             player2.draw(screen)
             cross.draw(screen)
@@ -143,6 +143,7 @@ class Level():
                 screen.blit(IMAGES['HEARTH2'], (1460 - i * 120, 20))
         else:
             screen.blit(MENU, [0, 0])
+            play.draw(screen)
 
     def ResetGame(self):
         self.player1.lives = 3
@@ -162,8 +163,9 @@ class Level():
         player2.rect.center = 1750, 300
         player.image = IMAGES['PLAYER']
         player2.image = IMAGES["PLAYER2"]
+
 class Text:
-    def __init__(self, text, text_color, pc_x, pc_y, font_size = 36, font_type = None):
+    def __init__(self, text, text_color, pc_x, pc_y, font_size=36, font_type=None):
         self.text = str(text)
         self.text_color = text_color
         self.font_size = font_size
@@ -179,6 +181,23 @@ class Text:
         surface.blit(self.image, self.rect)
 
 
+class Button(pygame.sprite.Sprite):
+    def __init__(self, image, cx, cy):
+        super().__init__()
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.center = cx, cy
+
+    def draw(self, surface):
+        if not self.rect.collidepoint(pygame.mouse.get_pos()):
+            self.image = IMAGES['PLAY01']
+            surface.blit(self.image, self.rect)
+        else:
+            self.image = IMAGES['PLAY02']
+            surface.blit(self.image, self.rect)
+
+
+
 # konkretyzacja obiektów
 player = Player(IMAGES['PLAYER'], -150, 500)
 player2 = Player(IMAGES['PLAYER2'], 1750, 300)
@@ -187,7 +206,7 @@ exclamation = Exclamation(IMAGES['EXCLAMATION'], 800, 400)
 cross = Cross(IMAGES['CROSS'], 550, 500)
 cross2 = Cross(IMAGES['CROSS'], 1050, 300)
 P1_win_text = Text("P1 WINS!", RED, *screen.get_rect().center, font_size=250, font_type="Ink Free")
-
+play = Button(IMAGES['PLAY01'], WIDTH/2, HEIGHT/2)
 # pętla gry
 window_open = True
 
@@ -205,6 +224,7 @@ while window_open:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     level.MenuActive = True
+                    level.ResetGame()
                 if event.key == pygame.K_RIGHT and event.key == pygame.K_LEFT:
                     print("Remis")
                 # ATAKI GRACZY
@@ -276,9 +296,12 @@ while window_open:
                     window_open = False
                 if event.key == pygame.K_UP:
                     level.MenuActive = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if play.rect.collidepoint(pygame.mouse.get_pos()):
+                    level.MenuActive = False
+                    pygame.time.delay(600)
 
     # rysowanie i aktualizacja obiektów
-
 
     # aktualizacja okna gry
     pygame.display.flip()
