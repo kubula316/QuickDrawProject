@@ -1,4 +1,4 @@
-import pygame, os, random
+import pygame, os, random, datetime
 
 pygame.init()
 
@@ -127,8 +127,8 @@ class Level():
         self.player1 = player
         self.player2 = player2
         self.IntroWasPlayed = False
-        self.GameHasEnded = False
         self.MenuActive = True
+        self.WatchLadderboard = False
 
     def draw(self):
         if not self.MenuActive:
@@ -144,6 +144,8 @@ class Level():
         else:
             screen.blit(MENU, [0, 0])
             play.draw(screen)
+            leaderboard.draw(screen)
+            home.draw(screen)
 
     def ResetGame(self):
         self.player1.lives = 3
@@ -155,10 +157,7 @@ class Level():
         self.player2.FailedAttack = False
         self.player2.IsAttacking = False
         self.IntroWasPlayed = False
-        self.GameHasEnded = True
         self.MenuActive = True
-        self.P1Won = False
-        self.P2Won = False
         player.rect.center = -150, 500
         player2.rect.center = 1750, 300
         player.image = IMAGES['PLAYER']
@@ -182,19 +181,18 @@ class Text:
 
 
 class Button(pygame.sprite.Sprite):
-    def __init__(self, image, cx, cy):
+    def __init__(self, image, image2 , cx, cy):
         super().__init__()
         self.image = image
+        self.image2 = image2
         self.rect = self.image.get_rect()
         self.rect.center = cx, cy
 
     def draw(self, surface):
         if not self.rect.collidepoint(pygame.mouse.get_pos()):
-            self.image = IMAGES['PLAY01']
             surface.blit(self.image, self.rect)
         else:
-            self.image = IMAGES['PLAY02']
-            surface.blit(self.image, self.rect)
+            surface.blit(self.image2, self.rect)
 
 
 
@@ -206,7 +204,11 @@ exclamation = Exclamation(IMAGES['EXCLAMATION'], 800, 400)
 cross = Cross(IMAGES['CROSS'], 550, 500)
 cross2 = Cross(IMAGES['CROSS'], 1050, 300)
 P1_win_text = Text("P1 WINS!", RED, *screen.get_rect().center, font_size=250, font_type="Ink Free")
-play = Button(IMAGES['PLAY01'], WIDTH/2, HEIGHT/2)
+P2_win_text = Text("P2 WINS!", RED, *screen.get_rect().center, font_size=250, font_type="Ink Free")
+play = Button(IMAGES['PLAY01'], IMAGES['PLAY02'] ,WIDTH/2, HEIGHT/2 - 140)
+leaderboard = Button(IMAGES['LEADERBOARD01'], IMAGES['LEADERBOARD02'], WIDTH/2, HEIGHT/2)
+home = Button(IMAGES['HOME01'], IMAGES['HOME02'], WIDTH/2, HEIGHT/2 + 140)
+
 # pętla gry
 window_open = True
 
@@ -260,13 +262,13 @@ while window_open:
                     cross2.drawing = False
                     player.IsAttacking = False
                 else:
-                    print("P1 wygrywa!")
-                    level.GameHasEnded = True
-                    level.P1Won = True
                     P1_win_text.draw(screen)
                     pygame.display.flip()
+                    data = datetime.datetime.now()
+                    data = data.replace(second=0, microsecond=0)
+                    data = data.strftime("%Y-%m-%d %H:%M")
                     with open('Match_history.txt', 'a') as file:
-                        file.write("P1Wins\n")
+                        file.write(f"P1 {player.lives}-{player2.lives} {data}\n")
                     pygame.time.delay(5000)
                     level.MenuActive = True
                     level.ResetGame()
@@ -286,20 +288,31 @@ while window_open:
                     cross.drawing = False
                     player2.IsAttacking = False
                 else:
-                    print("P2 wygrywa!")
-                    level.GameHasEnded = True
+                    P2_win_text.draw(screen)
+                    pygame.display.flip()
+                    data = datetime.datetime.now()
+                    data = data.replace(second=0, microsecond=0)
+                    data = data.strftime("%Y-%m-%d %H:%M")
+                    with open('Match_history.txt', 'a') as file:
+                        file.write(f"P2 {player.lives}-{player2.lives} {data}\n")
+                    pygame.time.delay(5000)
+                    level.MenuActive = True
+                    level.ResetGame()
         exclamation.checkAttack()
     else:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     window_open = False
-                if event.key == pygame.K_UP:
-                    level.MenuActive = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if play.rect.collidepoint(pygame.mouse.get_pos()):
                     level.MenuActive = False
                     pygame.time.delay(600)
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if home.rect.collidepoint(pygame.mouse.get_pos()):
+                    window_open = False
+
+
 
     # rysowanie i aktualizacja obiektów
 
