@@ -30,7 +30,6 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = cx, cy
         self.lives = 3
-        self.score = 0
         self.CanAttack = False
         self.FailedAttack = False
         self.IsAttacking = False
@@ -127,13 +126,9 @@ class Level():
     def __init__(self, player, player2):
         self.player1 = player
         self.player2 = player2
-        self.pointP1 = 0
-        self.PointP2 = 0
         self.IntroWasPlayed = False
         self.GameHasEnded = False
         self.MenuActive = False
-        self.P1Won = False
-        self.P2Won = False
 
     def draw(self):
         screen.blit(BACKGROUND, [0, 0])
