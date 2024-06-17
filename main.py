@@ -15,19 +15,19 @@ BACKGROUND = pygame.image.load(os.path.join(path, 'Background.png')).convert()
 MENU = pygame.image.load(os.path.join(path, 'MENU.png')).convert()
 Failed_Attack_P1 = pygame.USEREVENT + 1
 Failed_Attack_P2 = pygame.USEREVENT + 2
+AI_Attack = pygame.USEREVENT + 3
 
-
-#-------------------------------DŹWIĘKI-------------------------------
+# -------------------------------DŹWIĘKI-------------------------------
 pygame.mixer.init()
-#sound_main = pygame.mixer.Sound('-------')
+# sound_main = pygame.mixer.Sound('-------')
 sound_hover = pygame.mixer.Sound('sounds/hover.wav')
 sound_click = pygame.mixer.Sound('sounds/click.wav')
 sound_attack = pygame.mixer.Sound('sounds/attack.wav')
 sound_failed_attack = pygame.mixer.Sound('sounds/failed1.wav')
 sound_hit = pygame.mixer.Sound('sounds/hit1.wav')
-#sound_final = pygame.mixer.Sound('--------')
+# sound_final = pygame.mixer.Sound('--------')
 sound_event = pygame.mixer.Sound('sounds/click2.wav')
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 file_names.remove('Background.png')
 IMAGES = {}
 for file_name in file_names:
@@ -62,14 +62,14 @@ class Player(pygame.sprite.Sprite):
                 exclamation.AllowAttack = False
                 player2.IsAttacking = True
                 player.image = IMAGES['PLAYER1DAMAGE']
-                #self.sound_hitted.play()
+                # self.sound_hitted.play()
             elif self.image == IMAGES['PLAYER']:
                 self.image = IMAGES['PLAYER1ATTACK']
                 self.sound_attacked.play()
                 player2.lives -= 1
                 exclamation.AllowAttack = False
                 player2.image = IMAGES['PLAYER2DAMAGE']
-                #self.sound_hitted.play()
+                # self.sound_hitted.play()
                 player.IsAttacking = True
         else:
             print("Atak Zjeabyy")
@@ -96,18 +96,11 @@ class Exclamation():
         self.sound_played = False
 
     def draw(self, surface):
-            surface.blit(self.image, self.rect)
-
-
-
-
-
+        surface.blit(self.image, self.rect)
 
     def checkAttack(self):
 
         if exclamation.AllowAttack:
-
-
             if self.start_time is None:
                 self.start_time = pygame.time.get_ticks()
             # Check the time elapsed
@@ -119,12 +112,16 @@ class Exclamation():
                 if self.sound_played == False:
                     sound_event.play()
                     self.sound_played = True
+
             else:
                 exclamation.AllowAttack = False
                 self.start_time = None
                 player.CanAttack = False
                 player2.CanAttack = False
                 self.sound_played = False
+                if level.Singleplayer:
+                    los = 500 + self.random_interval
+                    pygame.time.set_timer(AI_Attack, los, 1)
 
     def startTimer(self):
         current_time2 = pygame.time.get_ticks()
@@ -132,6 +129,9 @@ class Exclamation():
             self.start_time2 = current_time2
             self.random_interval = random.randint(2000, 4000)  # Generate new random interval
             print(self.random_interval / 1000)
+            if level.Singleplayer:
+                los = 500 + self.random_interval
+                pygame.time.set_timer(AI_Attack, los, 1)
         if current_time2 - self.start_time2 >= self.random_interval:
             # Perform the action
             self.AllowAttack = True
@@ -139,6 +139,8 @@ class Exclamation():
             self.start_time2 = current_time2
             self.random_interval = random.randint(2000, 4000)  # Generate new random interval for next action
             print(self.random_interval / 1000)
+
+
 
 
 class Cross():
@@ -153,7 +155,7 @@ class Cross():
     def draw(self, surface):
         if self.drawing:
             surface.blit(self.image, self.rect)
-            if self.sound_played == False:
+            if not self.sound_played:
                 sound_event.play()
                 self.sound_played = True
         else:
@@ -167,6 +169,7 @@ class Level():
         self.IntroWasPlayed = False
         self.MenuActive = True
         self.WatchLeaderboard = False
+        self.Singleplayer = False
 
     def draw(self):
         if self.WatchLeaderboard:
@@ -204,6 +207,7 @@ class Level():
         player.image = IMAGES['PLAYER']
         player2.image = IMAGES["PLAYER2"]
 
+
 class Text:
     def __init__(self, text, text_color, pc_x, pc_y, font_size=36, font_type=None):
         self.text = str(text)
@@ -222,7 +226,7 @@ class Text:
 
 
 class Button(pygame.sprite.Sprite):
-    def __init__(self, image, image2 , cx, cy):
+    def __init__(self, image, image2, cx, cy):
         super().__init__()
         self.image = image
         self.image2 = image2
@@ -241,6 +245,7 @@ class Button(pygame.sprite.Sprite):
                 self.sound_hovered.play()
                 self.hover_sound_played = True
 
+
 class Leaderboard:
     def __init__(self, filename, font_size=50, font_color=(55, 15, 0)):
         self.filename = filename
@@ -257,7 +262,7 @@ class Leaderboard:
         return match_history
 
     def display(self, surface):
-        #pozycja wyników sigmy
+        # pozycja wyników sigmy
         y_offset = 300
         x_offset = 600
         next_line_offset = 50
@@ -265,7 +270,6 @@ class Leaderboard:
             text_surface = self.font.render(match, True, self.font_color)
             surface.blit(text_surface, (x_offset, y_offset))
             y_offset += next_line_offset
-
 
 
 # konkretyzacja obiektów
@@ -277,14 +281,15 @@ cross = Cross(IMAGES['CROSS'], 550, 500)
 cross2 = Cross(IMAGES['CROSS'], 1050, 300)
 P1_win_text = Text("P1 WINS!", RED, *screen.get_rect().center, font_size=250, font_type="Ink Free")
 P2_win_text = Text("P2 WINS!", RED, *screen.get_rect().center, font_size=250, font_type="Ink Free")
-play = Button(IMAGES['PLAY01'], IMAGES['PLAY02'] ,WIDTH/2, HEIGHT/2 - 140)
-leaderboard = Button(IMAGES['LEADERBOARD01'], IMAGES['LEADERBOARD02'], WIDTH/2, HEIGHT/2)
-home = Button(IMAGES['HOME01'], IMAGES['HOME02'], WIDTH/2, HEIGHT/2 + 140)
+play = Button(IMAGES['PLAY01'], IMAGES['PLAY02'], WIDTH / 2, HEIGHT / 2 - 140)
+leaderboard = Button(IMAGES['LEADERBOARD01'], IMAGES['LEADERBOARD02'], WIDTH / 2, HEIGHT / 2)
+home = Button(IMAGES['HOME01'], IMAGES['HOME02'], WIDTH / 2, HEIGHT / 2 + 140)
 
 # pętla gry
 window_open = True
 
 while window_open:
+    # rysowanie i aktualizacja obiektów
     level.draw()
     # pętla zdarzeń
     if not level.MenuActive:
@@ -300,15 +305,18 @@ while window_open:
                     level.MenuActive = True
                     level.ResetGame()
                 if event.key == pygame.K_RIGHT and event.key == pygame.K_LEFT:
-                    print("Remis")
+                    print("Remis(Bardzo mała szansa)")
                 # ATAKI GRACZY
-                if event.key == pygame.K_RIGHT:
+                elif event.key == pygame.K_RIGHT:
                     player2.Attack()
-                if event.key == pygame.K_LEFT:
+                elif event.key == pygame.K_LEFT:
                     player.Attack()
 
             if event.type == pygame.QUIT:
                 window_open = False
+            if event.type == AI_Attack:
+                player2.Attack()
+                print("DEBUG")
             if event.type == Failed_Attack_P1:
                 player.FailedAttack = False
                 cross.drawing = False
@@ -329,7 +337,6 @@ while window_open:
                     pygame.time.delay(100)
                     sound_hit.play()
                     pygame.time.delay(400)
-
                     player.image = IMAGES['PLAYER']
                     player2.image = IMAGES["PLAYER2"]
                     player.rect.center = 550, 500
@@ -396,10 +403,6 @@ while window_open:
                 if home.rect.collidepoint(pygame.mouse.get_pos()):
                     sound_click.play()
                     window_open = False
-
-
-
-    # rysowanie i aktualizacja obiektów
 
     # aktualizacja okna gry
     pygame.display.flip()
