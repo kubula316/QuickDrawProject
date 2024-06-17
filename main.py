@@ -202,6 +202,7 @@ class Level():
         self.player2.IsAttacking = False
         self.IntroWasPlayed = False
         self.MenuActive = True
+        self.Singleplayer = False
         player.rect.center = -150, 500
         player2.rect.center = 1750, 300
         player.image = IMAGES['PLAYER']
