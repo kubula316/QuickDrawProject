@@ -71,8 +71,8 @@ class Player(pygame.sprite.Sprite):
                 player2.image = IMAGES['PLAYER2DAMAGE']
                 # self.sound_hitted.play()
                 player.IsAttacking = True
+
         else:
-            print("Atak Zjeabyy")
             self.FailedAttack = True
             if self.image == IMAGES['PLAYER']:
                 cross.drawing = True
@@ -119,26 +119,28 @@ class Exclamation():
                 player.CanAttack = False
                 player2.CanAttack = False
                 self.sound_played = False
-                if level.Singleplayer:
-                    los = 500 + self.random_interval
-                    pygame.time.set_timer(AI_Attack, los, 1)
+
+
 
     def startTimer(self):
         current_time2 = pygame.time.get_ticks()
         if self.start_time2 is None:
             self.start_time2 = current_time2
-            self.random_interval = random.randint(2000, 4000)  # Generate new random interval
+            self.random_interval = random.randint(3000, 5000)  # Generate new random interval
             print(self.random_interval / 1000)
-            if level.Singleplayer:
-                los = 500 + self.random_interval
-                pygame.time.set_timer(AI_Attack, los, 1)
+
+
         if current_time2 - self.start_time2 >= self.random_interval:
             # Perform the action
             self.AllowAttack = True
+
             # Reset the timer
             self.start_time2 = current_time2
-            self.random_interval = random.randint(2000, 4000)  # Generate new random interval for next action
+            self.random_interval = random.randint(1500, 3500)  # Generate new random interval for next action
             print(self.random_interval / 1000)
+            if level.Singleplayer:
+                los = random.randint(350, 450)
+                pygame.time.set_timer(AI_Attack, los, 1)
 
 
 
@@ -169,12 +171,18 @@ class Level():
         self.IntroWasPlayed = False
         self.MenuActive = True
         self.WatchLeaderboard = False
+        self.ChoseGamemode = False
         self.Singleplayer = False
+        self.Multiplayer = False
 
     def draw(self):
         if self.WatchLeaderboard:
             screen.blit(MENU, [0, 0])
             Leaderboard('Match_history.txt').display(screen)
+        elif self.ChoseGamemode:
+            screen.blit(MENU, [0, 0])
+            singleplayer.draw(screen)
+            multiplayer.draw(screen)
         elif not self.MenuActive:
             screen.blit(BACKGROUND, [0, 0])
             player.draw(screen)
@@ -203,6 +211,7 @@ class Level():
         self.IntroWasPlayed = False
         self.MenuActive = True
         self.Singleplayer = False
+        self.ChoseGamemode = False
         player.rect.center = -150, 500
         player2.rect.center = 1750, 300
         player.image = IMAGES['PLAYER']
@@ -264,7 +273,7 @@ class Leaderboard:
 
     def display(self, surface):
         # pozycja wyników sigmy
-        y_offset = 300
+        y_offset = 150
         x_offset = 600
         next_line_offset = 50
         for match in reversed(self.match_history):
@@ -283,6 +292,8 @@ cross2 = Cross(IMAGES['CROSS'], 1050, 300)
 P1_win_text = Text("P1 WINS!", RED, *screen.get_rect().center, font_size=250, font_type="Ink Free")
 P2_win_text = Text("P2 WINS!", RED, *screen.get_rect().center, font_size=250, font_type="Ink Free")
 play = Button(IMAGES['PLAY01'], IMAGES['PLAY02'], WIDTH / 2, HEIGHT / 2 - 140)
+singleplayer = Button(IMAGES['SINGLE'], IMAGES['SINGLE'], WIDTH / 2 - 330, HEIGHT / 2)
+multiplayer = Button(IMAGES['MULTI'], IMAGES['MULTI'], WIDTH / 2 + 330, HEIGHT / 2)
 leaderboard = Button(IMAGES['LEADERBOARD01'], IMAGES['LEADERBOARD02'], WIDTH / 2, HEIGHT / 2)
 home = Button(IMAGES['HOME01'], IMAGES['HOME02'], WIDTH / 2, HEIGHT / 2 + 140)
 
@@ -293,7 +304,7 @@ while window_open:
     # rysowanie i aktualizacja obiektów
     level.draw()
     # pętla zdarzeń
-    if not level.MenuActive:
+    if not level.MenuActive and not level.ChoseGamemode:
         if not level.IntroWasPlayed:
             if player.rect.x < 550 - 190 and player2.rect.x > 1050 - 190:
                 player.rect.x += 10
@@ -315,9 +326,10 @@ while window_open:
 
             if event.type == pygame.QUIT:
                 window_open = False
-            if event.type == AI_Attack:
+            if event.type == AI_Attack and exclamation.AllowAttack:
                 player2.Attack()
                 print("DEBUG")
+                player2.CanAttack = False
             if event.type == Failed_Attack_P1:
                 player.FailedAttack = False
                 cross.drawing = False
@@ -352,7 +364,7 @@ while window_open:
                     data = data.strftime("%Y-%m-%d %H:%M")
                     with open('Match_history.txt', 'a') as file:
                         file.write(f"P1 {player.lives}-{player2.lives} {data}\n")
-                    pygame.time.delay(5000)
+                    pygame.time.delay(3000)
                     level.MenuActive = True
                     level.ResetGame()
 
@@ -381,7 +393,7 @@ while window_open:
                     data = data.strftime("%Y-%m-%d %H:%M")
                     with open('Match_history.txt', 'a') as file:
                         file.write(f"P2 {player.lives}-{player2.lives} {data}\n")
-                    pygame.time.delay(5000)
+                    pygame.time.delay(3000)
                     level.MenuActive = True
                     level.ResetGame()
         exclamation.checkAttack()
@@ -389,21 +401,34 @@ while window_open:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if level.WatchLeaderboard:
+                    if level.ChoseGamemode:
+                        level.ChoseGamemode = False
+                    elif level.WatchLeaderboard:
                         level.WatchLeaderboard = False
                     else:
                         window_open = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if play.rect.collidepoint(pygame.mouse.get_pos()):
                     sound_click.play()
+                    level.ChoseGamemode = True
+                    pygame.time.delay(150)
+                if singleplayer.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == True:
+                    level.Singleplayer = True
                     level.MenuActive = False
-                    pygame.time.delay(600)
-                if leaderboard.rect.collidepoint(pygame.mouse.get_pos()):
+                    level.ChoseGamemode = False
+                    pygame.time.delay(150)
+                if multiplayer.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == True:
+                    level.MenuActive = False
+                    level.ChoseGamemode = False
+                    pygame.time.delay(150)
+                if leaderboard.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == False:
                     sound_click.play()
                     level.WatchLeaderboard = True
-                if home.rect.collidepoint(pygame.mouse.get_pos()):
+                    pygame.time.delay(150)
+                if home.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == False:
                     sound_click.play()
                     window_open = False
+                    pygame.time.delay(150)
 
     # aktualizacja okna gry
     pygame.display.flip()
