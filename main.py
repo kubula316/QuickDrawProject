@@ -11,6 +11,8 @@ path = os.path.join(os.getcwd(), 'images')
 file_names = os.listdir(path)
 LIGHTGREEN = pygame.color.THECOLORS['lightgreen']
 RED = pygame.color.THECOLORS['red']
+BLACK = pygame.color.THECOLORS['black']
+ORANGE = (255,77,0)
 BACKGROUND = pygame.image.load(os.path.join(path, 'Background.png')).convert()
 BOARD = pygame.image.load(os.path.join(path, 'board.png')).convert()
 MENU = pygame.image.load(os.path.join(path, 'MENU.png')).convert()
@@ -128,7 +130,7 @@ class Exclamation():
         if self.start_time2 is None:
             self.start_time2 = current_time2
             self.random_interval = random.randint(3000, 5000)  # Generate new random interval
-            print(self.random_interval / 1000)
+            #print(self.random_interval / 1000)
 
 
         if current_time2 - self.start_time2 >= self.random_interval:
@@ -138,7 +140,7 @@ class Exclamation():
             # Reset the timer
             self.start_time2 = current_time2
             self.random_interval = random.randint(1500, 3500)  # Generate new random interval for next action
-            print(self.random_interval / 1000)
+            # print(self.random_interval / 1000)
             if level.Singleplayer:
                 los = random.randint(350, 450)
                 pygame.time.set_timer(AI_Attack, los, 1)
@@ -219,18 +221,16 @@ class Level():
         player2.image = IMAGES["PLAYER2"]
 
 
-class Text:
+class Text(pygame.font.Font):
     def __init__(self, text, text_color, pc_x, pc_y, font_size=36, font_type=None):
+        super().__init__(font_type, font_size)
         self.text = str(text)
         self.text_color = text_color
-        self.font_size = font_size
-        self.font_type = font_type
-        self.font = pygame.font.SysFont(self.font_type, self.font_size)
         self.pc_x = pc_x
         self.pc_y = pc_y
 
     def draw(self, surface):
-        self.image = self.font.render(self.text, True, self.text_color)
+        self.image = self.render(self.text, True, self.text_color)
         self.rect = self.image.get_rect()
         self.rect.center = self.pc_x, self.pc_y
         surface.blit(self.image, self.rect)
@@ -300,8 +300,8 @@ level = Level(player, player2)
 exclamation = Exclamation(IMAGES['EXCLAMATION'], 800, 400)
 cross = Cross(IMAGES['CROSS'], 550, 500)
 cross2 = Cross(IMAGES['CROSS'], 1050, 300)
-P1_win_text = Text("P1 WINS!", RED, *screen.get_rect().center, font_size=250, font_type="Ink Free")
-P2_win_text = Text("P2 WINS!", RED, *screen.get_rect().center, font_size=250, font_type="Ink Free")
+P1_win_text = Text("P1 WINS!", ORANGE, screen.get_width() - 550, screen.get_height() - 150, font_size=250, font_type="ARCADECLASSIC.ttf")
+P2_win_text = Text("P2 WINS!", ORANGE, screen.get_width() - 950, 125, font_size=250, font_type="ARCADECLASSIC.ttf")
 play = Button(IMAGES['PLAY01'], IMAGES['PLAY02'], WIDTH / 2, HEIGHT / 2 - 140)
 singleplayer = Button(IMAGES['SINGLE'], IMAGES['SINGLE2'], WIDTH / 2 - 330, HEIGHT / 2)
 multiplayer = Button(IMAGES['MULTI'], IMAGES['MULTI2'], WIDTH / 2 + 330, HEIGHT / 2)
