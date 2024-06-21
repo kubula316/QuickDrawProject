@@ -423,34 +423,46 @@ while window_open:
                     else:
                         window_open = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if play.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == False and level.WatchLeaderboard == False:
+                if (play.rect.collidepoint(pygame.mouse.get_pos())
+                        and level.ChoseGamemode == False
+                        and level.WatchLeaderboard == False):
                     sound_click.play()
                     level.ChoseGamemode = True
                     pygame.time.delay(150)
-                if singleplayer.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == True and level.WatchLeaderboard == False:
+                if (singleplayer.rect.collidepoint(pygame.mouse.get_pos())
+                        and level.ChoseGamemode == True
+                        and level.WatchLeaderboard == False):
                     sound_click.play()
                     level.Singleplayer = True
                     level.MenuActive = False
                     level.ChoseGamemode = False
                     pygame.time.delay(150)
-                if multiplayer.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == True and level.WatchLeaderboard == False:
+                if (multiplayer.rect.collidepoint(pygame.mouse.get_pos())
+                        and level.ChoseGamemode == True
+                        and level.WatchLeaderboard == False):
                     sound_click.play()
                     level.MenuActive = False
                     level.ChoseGamemode = False
                     pygame.time.delay(150)
-                if home2.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == True:
+                if (home2.rect.collidepoint(pygame.mouse.get_pos())
+                        and level.ChoseGamemode == True):
                     sound_click.play()
                     level.ChoseGamemode = False
                     pygame.time.delay(150)
-                if leaderboard.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == False and level.WatchLeaderboard == False:
+                if (leaderboard.rect.collidepoint(pygame.mouse.get_pos())
+                        and level.ChoseGamemode == False
+                        and level.WatchLeaderboard == False):
                     sound_click.play()
                     level.WatchLeaderboard = True
                     pygame.time.delay(150)
-                if home3.rect.collidepoint(pygame.mouse.get_pos()) and level.WatchLeaderboard == True:
+                if (home3.rect.collidepoint(pygame.mouse.get_pos())
+                        and level.WatchLeaderboard == True):
                     sound_click.play()
                     level.WatchLeaderboard = False
                     pygame.time.delay(150)
-                if home.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == False and level.WatchLeaderboard == False:
+                if (home.rect.collidepoint(pygame.mouse.get_pos())
+                        and level.ChoseGamemode == False
+                        and level.WatchLeaderboard == False):
                     sound_click.play()
                     window_open = False
                     pygame.time.delay(150)
