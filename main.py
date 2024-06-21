@@ -276,6 +276,7 @@ class Leaderboard:
         return match_history
 
     def display(self, surface):
+        home3.draw(screen)
         surface.blit(BOARD, (WIDTH / 2 - 375, HEIGHT / 2 - 310))
         table_text = "|  WON  |  LIVES  |             DATE             |"
 
@@ -307,6 +308,7 @@ multiplayer = Button(IMAGES['MULTI'], IMAGES['MULTI2'], WIDTH / 2 + 330, HEIGHT 
 leaderboard = Button(IMAGES['LEADERBOARD01'], IMAGES['LEADERBOARD02'], WIDTH / 2, HEIGHT / 2)
 home = Button(IMAGES['HOME01'], IMAGES['HOME02'], WIDTH / 2, HEIGHT / 2 + 140)
 home2 = Button(IMAGES['HOME01'], IMAGES['HOME02'], WIDTH / 2, HEIGHT / 2 + 250)
+home3 = Button(IMAGES['HOME01'], IMAGES['HOME02'], WIDTH / 2, HEIGHT / 2 - 370)
 
 # pętla gry
 window_open = True
@@ -421,17 +423,17 @@ while window_open:
                     else:
                         window_open = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if play.rect.collidepoint(pygame.mouse.get_pos()):
+                if play.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == False and level.WatchLeaderboard == False:
                     sound_click.play()
                     level.ChoseGamemode = True
                     pygame.time.delay(150)
-                if singleplayer.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == True:
+                if singleplayer.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == True and level.WatchLeaderboard == False:
                     sound_click.play()
                     level.Singleplayer = True
                     level.MenuActive = False
                     level.ChoseGamemode = False
                     pygame.time.delay(150)
-                if multiplayer.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == True:
+                if multiplayer.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == True and level.WatchLeaderboard == False:
                     sound_click.play()
                     level.MenuActive = False
                     level.ChoseGamemode = False
@@ -440,11 +442,15 @@ while window_open:
                     sound_click.play()
                     level.ChoseGamemode = False
                     pygame.time.delay(150)
-                if leaderboard.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == False:
+                if leaderboard.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == False and level.WatchLeaderboard == False:
                     sound_click.play()
                     level.WatchLeaderboard = True
                     pygame.time.delay(150)
-                if home.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == False:
+                if home3.rect.collidepoint(pygame.mouse.get_pos()) and level.WatchLeaderboard == True:
+                    sound_click.play()
+                    level.WatchLeaderboard = False
+                    pygame.time.delay(150)
+                if home.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == False and level.WatchLeaderboard == False:
                     sound_click.play()
                     window_open = False
                     pygame.time.delay(150)
