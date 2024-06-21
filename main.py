@@ -12,6 +12,7 @@ file_names = os.listdir(path)
 LIGHTGREEN = pygame.color.THECOLORS['lightgreen']
 RED = pygame.color.THECOLORS['red']
 BACKGROUND = pygame.image.load(os.path.join(path, 'Background.png')).convert()
+BOARD = pygame.image.load(os.path.join(path, 'board.png')).convert()
 MENU = pygame.image.load(os.path.join(path, 'MENU.png')).convert()
 Failed_Attack_P1 = pygame.USEREVENT + 1
 Failed_Attack_P2 = pygame.USEREVENT + 2
@@ -19,13 +20,13 @@ AI_Attack = pygame.USEREVENT + 3
 
 # -------------------------------DŹWIĘKI-------------------------------
 pygame.mixer.init()
-# sound_main = pygame.mixer.Sound('-------')
+sound_main = pygame.mixer.Sound('sounds/background.wav')
 sound_hover = pygame.mixer.Sound('sounds/hover.wav')
 sound_click = pygame.mixer.Sound('sounds/click.wav')
 sound_attack = pygame.mixer.Sound('sounds/attack.wav')
 sound_failed_attack = pygame.mixer.Sound('sounds/failed1.wav')
 sound_hit = pygame.mixer.Sound('sounds/hit1.wav')
-# sound_final = pygame.mixer.Sound('--------')
+sound_win = pygame.mixer.Sound('sounds/win.wav')
 sound_event = pygame.mixer.Sound('sounds/click2.wav')
 # ---------------------------------------------------------------------
 file_names.remove('Background.png')
@@ -158,7 +159,7 @@ class Cross():
         if self.drawing:
             surface.blit(self.image, self.rect)
             if not self.sound_played:
-                sound_event.play()
+                sound_failed_attack.play()
                 self.sound_played = True
         else:
             self.sound_played = False
@@ -173,7 +174,6 @@ class Level():
         self.WatchLeaderboard = False
         self.ChoseGamemode = False
         self.Singleplayer = False
-        self.Multiplayer = False
 
     def draw(self):
         if self.WatchLeaderboard:
@@ -183,6 +183,7 @@ class Level():
             screen.blit(MENU, [0, 0])
             singleplayer.draw(screen)
             multiplayer.draw(screen)
+            home2.draw(screen)
         elif not self.MenuActive:
             screen.blit(BACKGROUND, [0, 0])
             player.draw(screen)
@@ -256,6 +257,9 @@ class Button(pygame.sprite.Sprite):
                 self.hover_sound_played = True
 
 
+
+
+
 class Leaderboard:
     def __init__(self, filename, font_size=50, font_color=(55, 15, 0)):
         self.filename = filename
@@ -268,14 +272,20 @@ class Leaderboard:
         match_history = []
         with open(self.filename, 'r') as file:
             lines = file.readlines()
-            match_history = [line.strip() for line in lines[-10:]]
+            match_history = [line.strip() for line in lines[-6:]]
         return match_history
 
     def display(self, surface):
-        # pozycja wyników sigmy
-        y_offset = 150
-        x_offset = 600
+        surface.blit(BOARD, (WIDTH / 2 - 375, HEIGHT / 2 - 310))
+        table_text = "|  WON  |  LIVES  |             DATE             |"
+
+        table = self.font.render(table_text, True, self.font_color)
+        # pozycja wyników
+        y_offset = 250
+        x_offset = 540
         next_line_offset = 50
+
+        surface.blit(table, (485, 160))
         for match in reversed(self.match_history):
             text_surface = self.font.render(match, True, self.font_color)
             surface.blit(text_surface, (x_offset, y_offset))
@@ -292,14 +302,16 @@ cross2 = Cross(IMAGES['CROSS'], 1050, 300)
 P1_win_text = Text("P1 WINS!", RED, *screen.get_rect().center, font_size=250, font_type="Ink Free")
 P2_win_text = Text("P2 WINS!", RED, *screen.get_rect().center, font_size=250, font_type="Ink Free")
 play = Button(IMAGES['PLAY01'], IMAGES['PLAY02'], WIDTH / 2, HEIGHT / 2 - 140)
-singleplayer = Button(IMAGES['SINGLE'], IMAGES['SINGLE'], WIDTH / 2 - 330, HEIGHT / 2)
-multiplayer = Button(IMAGES['MULTI'], IMAGES['MULTI'], WIDTH / 2 + 330, HEIGHT / 2)
+singleplayer = Button(IMAGES['SINGLE'], IMAGES['SINGLE2'], WIDTH / 2 - 330, HEIGHT / 2)
+multiplayer = Button(IMAGES['MULTI'], IMAGES['MULTI2'], WIDTH / 2 + 330, HEIGHT / 2)
 leaderboard = Button(IMAGES['LEADERBOARD01'], IMAGES['LEADERBOARD02'], WIDTH / 2, HEIGHT / 2)
 home = Button(IMAGES['HOME01'], IMAGES['HOME02'], WIDTH / 2, HEIGHT / 2 + 140)
+home2 = Button(IMAGES['HOME01'], IMAGES['HOME02'], WIDTH / 2, HEIGHT / 2 + 250)
 
 # pętla gry
 window_open = True
-
+sound_main.set_volume(0.05)
+sound_main.play(loops=-1)
 while window_open:
     # rysowanie i aktualizacja obiektów
     level.draw()
@@ -328,7 +340,6 @@ while window_open:
                 window_open = False
             if event.type == AI_Attack and exclamation.AllowAttack:
                 player2.Attack()
-                print("DEBUG")
                 player2.CanAttack = False
             if event.type == Failed_Attack_P1:
                 player.FailedAttack = False
@@ -358,12 +369,13 @@ while window_open:
                     player.IsAttacking = False
                 else:
                     P1_win_text.draw(screen)
+                    sound_win.play()
                     pygame.display.flip()
                     data = datetime.datetime.now()
                     data = data.replace(second=0, microsecond=0)
                     data = data.strftime("%Y-%m-%d %H:%M")
                     with open('Match_history.txt', 'a') as file:
-                        file.write(f"P1 {player.lives}-{player2.lives} {data}\n")
+                        file.write(f"P1         {player.lives}-{player2.lives}         {data}\n")
                     pygame.time.delay(3000)
                     level.MenuActive = True
                     level.ResetGame()
@@ -387,12 +399,13 @@ while window_open:
                     player2.IsAttacking = False
                 else:
                     P2_win_text.draw(screen)
+                    sound_win.play()
                     pygame.display.flip()
                     data = datetime.datetime.now()
                     data = data.replace(second=0, microsecond=0)
                     data = data.strftime("%Y-%m-%d %H:%M")
                     with open('Match_history.txt', 'a') as file:
-                        file.write(f"P2 {player.lives}-{player2.lives} {data}\n")
+                        file.write(f"P2         {player.lives}-{player2.lives}         {data}\n")
                     pygame.time.delay(3000)
                     level.MenuActive = True
                     level.ResetGame()
@@ -413,12 +426,18 @@ while window_open:
                     level.ChoseGamemode = True
                     pygame.time.delay(150)
                 if singleplayer.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == True:
+                    sound_click.play()
                     level.Singleplayer = True
                     level.MenuActive = False
                     level.ChoseGamemode = False
                     pygame.time.delay(150)
                 if multiplayer.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == True:
+                    sound_click.play()
                     level.MenuActive = False
+                    level.ChoseGamemode = False
+                    pygame.time.delay(150)
+                if home2.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == True:
+                    sound_click.play()
                     level.ChoseGamemode = False
                     pygame.time.delay(150)
                 if leaderboard.rect.collidepoint(pygame.mouse.get_pos()) and level.ChoseGamemode == False:
